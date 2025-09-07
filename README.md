@@ -40,6 +40,7 @@ Example flake for x86_64-linux. This can be expanded to other systems as well.
     {
       devShells.${system}.default = pkgs.mkShell {
         packages = [
+          # A redis package needs to be provided manually - it's not included in start-redis/stop-redis
           pkgs.redis
           redis-dev-db.start-redis
           redis-dev-db.stop-redis
