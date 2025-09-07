@@ -8,6 +8,7 @@ Following packages are available inside this flake's outputs:
 
 - `start-redis` starts a Redis server inside `$REDIS_DATA` on port `$REDIS_PORT` (default: 6379)
 - `stop-redis` stops the Redis server
+- `redis-cli-wrapped` launches `redis-cli` with the configured `$REDIS_PORT`
 
 ## Usage in a dev shell
 
