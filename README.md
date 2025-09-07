@@ -54,3 +54,7 @@ Example flake for x86_64-linux. This can be expanded to other systems as well.
     };
 }
 ```
+
+## References
+
+- Heavily inspired by [hermann-p/nix-postgres-dev-db](https://github.com/hermann-p/nix-postgres-dev-db)
