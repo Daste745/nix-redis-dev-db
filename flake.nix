@@ -5,7 +5,12 @@
   };
 
   outputs =
-    { self, systems, nixpkgs, ... }:
+    {
+      self,
+      systems,
+      nixpkgs,
+      ...
+    }:
     let
       inherit (nixpkgs.lib) getExe;
       eachSystem =
@@ -20,7 +25,7 @@
     in
     {
       packages = eachSystem (
-        { system, pkgs }:
+        { pkgs, ... }:
         let
           redis-data-dir = "$REDIS_DATA";
           redis-port = "\${REDIS_PORT:-6379}";
@@ -36,41 +41,45 @@
           '';
         in
         {
-          start-redis = (pkgs.writeShellScriptBin "start-redis" ''
-            set -eu
-            ${getExe check-redis-env}
-            # FIXME: This check can give a false-positive if the PID file is stale (server wasn't stopped properly)
-            if [[ -f ${redis-pid-file} ]]; then
-              echo "Redis server is already running with PID $(cat ${redis-pid-file})"
-              exit 0
-            fi
-            if [[ ! -d ${redis-data-dir} ]]; then
-              echo "Creating Redis data directory: ${redis-data-dir}"
-              mkdir -p ${redis-data-dir}
-            fi
-            touch ${redis-log-file}
-            ${pkgs.redis}/bin/redis-server \
-              --bind 127.0.0.1 \
-              --port ${redis-port} \
-              --daemonize yes \
-              --dir ${redis-data-dir} \
-              --logfile ${redis-log-file} \
-              --pidfile ${redis-pid-file}
-            echo "Redis server started at ${redis-data-dir}"
-          '');
+          start-redis = (
+            pkgs.writeShellScriptBin "start-redis" ''
+              set -eu
+              ${getExe check-redis-env}
+              # FIXME: This check can give a false-positive if the PID file is stale (server wasn't stopped properly)
+              if [[ -f ${redis-pid-file} ]]; then
+                echo "Redis server is already running with PID $(cat ${redis-pid-file})"
+                exit 0
+              fi
+              if [[ ! -d ${redis-data-dir} ]]; then
+                echo "Creating Redis data directory: ${redis-data-dir}"
+                mkdir -p ${redis-data-dir}
+              fi
+              touch ${redis-log-file}
+              ${pkgs.redis}/bin/redis-server \
+                --bind 127.0.0.1 \
+                --port ${redis-port} \
+                --daemonize yes \
+                --dir ${redis-data-dir} \
+                --logfile ${redis-log-file} \
+                --pidfile ${redis-pid-file}
+              echo "Redis server started at ${redis-data-dir}"
+            ''
+          );
 
-          stop-redis = (pkgs.writeShellScriptBin "stop-redis" ''
-            set -eu
-            ${getExe check-redis-env}
-            if [[ ! -f ${redis-pid-file} ]]; then
-              echo "Redis server is not running, no PID file found."
-              exit 0
-            fi
-            redis_pid=$(cat ${redis-pid-file})
-            echo "Stopping Redis server with PID $redis_pid"
-            kill $redis_pid || true
-            echo "Redis server stopped."
-          '');
+          stop-redis = (
+            pkgs.writeShellScriptBin "stop-redis" ''
+              set -eu
+              ${getExe check-redis-env}
+              if [[ ! -f ${redis-pid-file} ]]; then
+                echo "Redis server is not running, no PID file found."
+                exit 0
+              fi
+              redis_pid=$(cat ${redis-pid-file})
+              echo "Stopping Redis server with PID $redis_pid"
+              kill $redis_pid || true
+              echo "Redis server stopped."
+            ''
+          );
         }
       );
 
