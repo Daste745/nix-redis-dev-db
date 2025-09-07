@@ -29,10 +29,10 @@
         let
           redis-data-dir = "$REDIS_DATA";
           redis-port = "\${REDIS_PORT:-6379}";
-          redis-pid-file = "${redis-data-dir}/redis.pid";
-          redis-log-file = "${redis-data-dir}/redis.log";
+          pid-file = "${redis-data-dir}/redis.pid";
+          log-file = "${redis-data-dir}/redis.log";
 
-          check-redis-env = pkgs.writeShellScriptBin "check-redis-env" ''
+          check-env = pkgs.writeShellScriptBin "check-env" ''
             set -eu
             if [ -z "${redis-data-dir}" ]; then
               echo "${redis-data-dir} is not set. Please set it in your environment."
@@ -44,24 +44,24 @@
           start-redis = (
             pkgs.writeShellScriptBin "start-redis" ''
               set -eu
-              ${getExe check-redis-env}
+              ${getExe check-env}
               # FIXME: This check can give a false-positive if the PID file is stale (server wasn't stopped properly)
-              if [[ -f ${redis-pid-file} ]]; then
-                echo "Redis server is already running with PID $(cat ${redis-pid-file})"
+              if [[ -f ${pid-file} ]]; then
+                echo "Redis server is already running with PID $(cat ${pid-file})"
                 exit 0
               fi
               if [[ ! -d ${redis-data-dir} ]]; then
                 echo "Creating Redis data directory: ${redis-data-dir}"
                 mkdir -p ${redis-data-dir}
               fi
-              touch ${redis-log-file}
+              touch ${log-file}
               ${pkgs.redis}/bin/redis-server \
                 --bind 127.0.0.1 \
                 --port ${redis-port} \
                 --daemonize yes \
                 --dir ${redis-data-dir} \
-                --logfile ${redis-log-file} \
-                --pidfile ${redis-pid-file}
+                --logfile ${log-file} \
+                --pidfile ${pid-file}
               echo "Redis server started at ${redis-data-dir}"
             ''
           );
@@ -69,12 +69,12 @@
           stop-redis = (
             pkgs.writeShellScriptBin "stop-redis" ''
               set -eu
-              ${getExe check-redis-env}
-              if [[ ! -f ${redis-pid-file} ]]; then
+              ${getExe check-env}
+              if [[ ! -f ${pid-file} ]]; then
                 echo "Redis server is not running, no PID file found."
                 exit 0
               fi
-              redis_pid=$(cat ${redis-pid-file})
+              redis_pid=$(cat ${pid-file})
               echo "Stopping Redis server with PID $redis_pid"
               kill $redis_pid || true
               echo "Redis server stopped."
