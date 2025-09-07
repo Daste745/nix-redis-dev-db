@@ -45,7 +45,6 @@
             pkgs.writeShellScriptBin "start-redis" ''
               set -eu
               ${getExe check-env}
-              # FIXME: This check can give a false-positive if the PID file is stale (server wasn't stopped properly)
               if [[ -f ${pid-file} ]]; then
                 echo "Redis server is already running with PID $(cat ${pid-file})"
                 exit 0
@@ -71,13 +70,13 @@
               set -eu
               ${getExe check-env}
               if [[ ! -f ${pid-file} ]]; then
-                echo "Redis server is not running, no PID file found."
+                echo "Redis server is not running, no PID file found"
                 exit 0
               fi
               redis_pid=$(cat ${pid-file})
               echo "Stopping Redis server with PID $redis_pid"
-              kill $redis_pid || true
-              echo "Redis server stopped."
+              kill $redis_pid || rm ${pid-file}
+              echo "Redis server stopped"
             ''
           );
 
