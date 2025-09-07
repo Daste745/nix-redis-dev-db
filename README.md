@@ -44,6 +44,7 @@ Example flake for x86_64-linux. This can be expanded to other systems as well.
           pkgs.redis
           redis-dev-db.start-redis
           redis-dev-db.stop-redis
+          redis-dev-db.redis-cli-wrapped
         ];
         shellHook = ''
           # If the directory is not tracked by git, swap this for the absolute path to the directory
