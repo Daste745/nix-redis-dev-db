@@ -23,6 +23,7 @@
         { system, pkgs }:
         let
           redis-data-dir = "$REDIS_DATA";
+          redis-port = "\${REDIS_PORT:-6379}";
           redis-pid-file = "${redis-data-dir}/redis.pid";
           redis-log-file = "${redis-data-dir}/redis.log";
 
@@ -50,7 +51,7 @@
             touch ${redis-log-file}
             ${pkgs.redis}/bin/redis-server \
               --bind 127.0.0.1 \
-              --port 6379 \
+              --port ${redis-port} \
               --daemonize yes \
               --dir ${redis-data-dir} \
               --logfile ${redis-log-file} \
@@ -84,6 +85,7 @@
             ];
             shellHook = ''
               export REDIS_DATA=$(git rev-parse --show-toplevel)/REDIS_DATA
+              export REDIS_PORT=63790
             '';
           };
         }
