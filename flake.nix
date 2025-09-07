@@ -55,7 +55,7 @@
                 mkdir -p ${redis-data-dir}
               fi
               touch ${log-file}
-              ${pkgs.redis}/bin/redis-server \
+              redis-server \
                 --bind 127.0.0.1 \
                 --port ${redis-port} \
                 --daemonize yes \
@@ -80,6 +80,8 @@
               echo "Redis server stopped."
             ''
           );
+
+          # TODO: `redis-cli-wrapped` with the selected port
         }
       );
 
