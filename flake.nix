@@ -80,7 +80,13 @@
             ''
           );
 
-          # TODO: `redis-cli-wrapped` with the selected port
+          redis-cli-wrapped = (
+            pkgs.writeShellScriptBin "redis-cli-wrapped" ''
+              set -eu
+              ${getExe check-env}
+              redis-cli -p ${redis-port} "$@"
+            ''
+          );
         }
       );
 
@@ -92,6 +98,7 @@
               pkgs.redis
               self.packages.${system}.start-redis
               self.packages.${system}.stop-redis
+              self.packages.${system}.redis-cli-wrapped
             ];
             shellHook = ''
               export REDIS_DATA=$(git rev-parse --show-toplevel)/REDIS_DATA
