@@ -6,16 +6,16 @@ This flake is a simple wrapper around redis-server that provides scripts to star
 
 Following packages are available inside this flake's outputs:
 
-- `start-redis` starts a Redis server inside `$REDIS_DATA` on port `$REDIS_PORT` (default: 6379)
+- `start-redis` starts a Redis server inside `$REDIS_DATA` on host `$REDIS_HOST` (default: 127.0.0.1) and port `$REDIS_PORT` (default: 6379)
 - `stop-redis` stops the Redis server
-- `redis-cli-wrapped` launches `redis-cli` with the configured `$REDIS_PORT`
+- `redis-cli-wrapped` launches `redis-cli` with the configured `$REDIS_HOST` and `$REDIS_PORT`
 
 ## Usage in a dev shell
 
 1. Add `github:Daste745/nix-redis-dev-db` as an input
 2. Add `start-redis` and `stop-redis` to your dev shell's `packages`
 3. Add a redis package to your dev shell's `packages`
-4. Export `REDIS_DATA` and `REDIS_PORT` (optional) to your shell (e.g. using a shellHook)
+4. Export `REDIS_DATA`, `REDIS_HOST` (optional) and `REDIS_PORT` (optional) to your shell (e.g. using a shellHook)
 5. Use `start-redis` to start the Redis server and `stop-redis` to stop it
 
 Example flake for x86_64-linux. This can be expanded to other systems as well.
@@ -49,6 +49,8 @@ Example flake for x86_64-linux. This can be expanded to other systems as well.
         shellHook = ''
           # If the directory is not tracked by git, swap this for the absolute path to the directory
           export REDIS_DATA=$(git rev-parse --show-toplevel)/REDIS_DATA
+          # Optional - default is 127.0.0.1
+          export REDIS_HOST=127.0.0.1
           # Optional - default is 6379
           export REDIS_PORT=6379
         '';

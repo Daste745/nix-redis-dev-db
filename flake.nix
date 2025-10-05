@@ -28,6 +28,7 @@
         { pkgs, ... }:
         let
           redis-data-dir = "$REDIS_DATA";
+          redis-host = "\${REDIS_HOST:-127.0.0.1}";
           redis-port = "\${REDIS_PORT:-6379}";
           pid-file = "${redis-data-dir}/redis.pid";
           log-file = "${redis-data-dir}/redis.log";
@@ -55,7 +56,7 @@
                 fi
                 touch "${log-file}"
                 redis-server \
-                  --bind 127.0.0.1 \
+                  --bind "${redis-host}" \
                   --port "${redis-port}" \
                   --daemonize yes \
                   --dir "${redis-data-dir}" \
@@ -107,6 +108,7 @@
             ];
             shellHook = ''
               export REDIS_DATA=$(git rev-parse --show-toplevel)/REDIS_DATA
+              export REDIS_HOST=127.0.0.1
               export REDIS_PORT=63790
             '';
           };
