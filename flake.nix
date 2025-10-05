@@ -42,50 +42,55 @@
         in
         {
           start-redis = (
-            pkgs.writeShellScriptBin "start-redis" ''
-              set -eu
-              ${getExe check-env}
-              if [[ -f ${pid-file} ]]; then
-                echo "Redis server is already running with PID $(cat ${pid-file})"
-                exit 0
-              fi
-              if [[ ! -d ${redis-data-dir} ]]; then
-                echo "Creating Redis data directory: ${redis-data-dir}"
-                mkdir -p ${redis-data-dir}
-              fi
-              touch ${log-file}
-              redis-server \
-                --bind 127.0.0.1 \
-                --port ${redis-port} \
-                --daemonize yes \
-                --dir ${redis-data-dir} \
-                --logfile ${log-file} \
-                --pidfile ${pid-file}
-              echo "Redis server started at ${redis-data-dir}"
-            ''
+            pkgs.writeShellApplication {
+              name = "start-redis";
+              text = ''
+                if [[ -f "${pid-file}" ]]; then
+                  echo "Redis server is already running with PID $(cat "${pid-file}")"
+                  exit 0
+                fi
+                if [[ ! -d "${redis-data-dir}" ]]; then
+                  echo "Creating Redis data directory: ${redis-data-dir}"
+                  mkdir -p "${redis-data-dir}"
+                fi
+                touch "${log-file}"
+                redis-server \
+                  --bind 127.0.0.1 \
+                  --port "${redis-port}" \
+                  --daemonize yes \
+                  --dir "${redis-data-dir}" \
+                  --logfile "${log-file}" \
+                  --pidfile "${pid-file}"
+                echo "Redis server started at ${redis-data-dir}"
+              '';
+            }
           );
 
           stop-redis = (
-            pkgs.writeShellScriptBin "stop-redis" ''
-              set -eu
-              ${getExe check-env}
-              if [[ ! -f ${pid-file} ]]; then
-                echo "Redis server is not running, no PID file found"
-                exit 0
-              fi
-              redis_pid=$(cat ${pid-file})
-              echo "Stopping Redis server with PID $redis_pid"
-              kill $redis_pid || rm ${pid-file}
-              echo "Redis server stopped"
-            ''
+            pkgs.writeShellApplication {
+              name = "stop-redis";
+              text = ''
+                ${getExe check-env}
+                if [[ ! -f "${pid-file}" ]]; then
+                  echo "Redis server is not running, no PID file found"
+                  exit 0
+                fi
+                redis_pid=$(cat "${pid-file}")
+                echo "Stopping Redis server with PID $redis_pid"
+                kill "$redis_pid" || rm "${pid-file}"
+                echo "Redis server stopped"
+              '';
+            }
           );
 
           redis-cli-wrapped = (
-            pkgs.writeShellScriptBin "redis-cli-wrapped" ''
-              set -eu
-              ${getExe check-env}
-              redis-cli -p ${redis-port} "$@"
-            ''
+            pkgs.writeShellApplication {
+              name = "redis-cli-wrapped";
+              text = ''
+                ${getExe check-env}
+                redis-cli -p "${redis-port}" "$@"
+              '';
+            }
           );
         }
       );
